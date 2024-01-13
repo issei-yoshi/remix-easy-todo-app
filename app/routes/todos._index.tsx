@@ -5,6 +5,7 @@ type Todo = {
   id: string;
   content: string;
   completed: boolean;
+  edit: boolean;
 }
 
 export default function TodoIndexPage() {
@@ -28,7 +29,8 @@ export default function TodoIndexPage() {
     setTodoLists([...todoLists,{
       id: todoId,
       content: todo,
-      completed: false
+      completed: false,
+      edit: false
     }])
 
     setTodo("");
@@ -44,6 +46,39 @@ export default function TodoIndexPage() {
     setTodoLists(lists)
   }
 
+  const handleEdit = (id: string) => {
+    const todos = [...todoLists]
+    const todo = todos.find((todo) => todo.id == id);
+    if(!todo) return
+    todo.edit = true
+    setTodoLists(todos)
+  }
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>, id: string) => {
+    const todos = [...todoLists]
+    const todo = todos.find((todo) => todo.id === id);
+    if(!todo) return;
+    todo.content = e.target.value;
+    setTodoLists(todos)
+  }
+
+  const handleUpdate = (id: string) => {
+    const todos = [...todoLists]
+    const todo = todoLists.find((todo) => todo.id == id);
+    if (!todo) return
+    todo.edit = !todo.edit;
+    setTodoLists(todos)
+  }
+
+  const handleDelete = (id: string) => {
+    const todos = [...todoLists];
+    const todo = todos.find((todo) => todo.id === id);
+    if(!todo) return;
+
+    const newTodos = todos.filter((todo) => todo.id !== id)
+    setTodoLists(newTodos)
+  }
+
   return(
     <>
       <div>
@@ -54,12 +89,25 @@ export default function TodoIndexPage() {
       </div>
 
       <div>
-        {todoLists.map((todo) => (
-          <div className={todo.completed ? "text-gray-500" : ""}>
-            <input type="checkbox" checked={todo.completed} onChange={() => handleChecked(todo.id)} />
-            {todo.content}
-          </div>
-        ))}
+        {todoLists.map((todo) => {
+          return(
+            todo.edit ? (
+              <div key={todo.id} className={todo.completed ? "text-gray-500" : ""}>
+                <input type="text" onChange={(e) => handleEditChange(e, todo.id)} />
+                <button onClick={() => handleUpdate(todo.id)}>保存</button>
+              </div>
+              )
+              :
+              (
+                <div key={todo.id} className={todo.completed ? "text-gray-500" : ""}>
+                  <input type="checkbox" checked={todo.completed} onChange={() => handleChecked(todo.id)} />
+                    {todo.content}
+                  <button onClick={() => handleEdit(todo.id)}>編集</button>
+                  <button onClick={() => handleDelete(todo.id)}>削除</button>
+                </div>
+              ))
+            }
+          )}
       </div>
     </>
   )
